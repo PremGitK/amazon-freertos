@@ -649,13 +649,15 @@ static IotNetworkManager_t networkManager =
         /* Set DNS server address for cellular network. */
         if( cellularStatus == true )
         {
-            cellularHalStatus = Cellular_SetDns( CellularHandle, configCELLULAR_PDN_CONTEXT_ID, configCELLULAR_DNS_SERVER );
+        	//Bypassing DNS : PREM
+            /*cellularHalStatus = Cellular_SetDns( CellularHandle, configCELLULAR_PDN_CONTEXT_ID, configCELLULAR_DNS_SERVER );
 
             if( ( cellularHalStatus != CELLULAR_SUCCESS ) && ( cellularHalStatus != CELLULAR_UNSUPPORTED ) )
             {
                 IotLogError( "Cellular set DNS failed %d", cellularHalStatus );
                 cellularStatus = false;
             }
+            */
         }
 
         /* Clean up the cellular network. */

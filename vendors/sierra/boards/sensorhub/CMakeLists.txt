@@ -99,7 +99,7 @@ target_sources(
 )
 
 # Cellular module port
-include("${AFR_VENDORS_DIR}/sierra/modules/hl7802/CMakeLists.txt")
+include("${AFR_VENDORS_DIR}/sierra/modules/bg96/CMakeLists.txt")
 endif()
 
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
@@ -391,7 +391,6 @@ target_link_libraries(
 # FreeRTOS demos and tests
 # -------------------------------------------------------------------------------------------------
 afr_glob_src(config_files DIRECTORY "${board_dir}/config_files")
-
 # Do not add demos or tests if they're turned off.
 if(AFR_ENABLE_DEMOS OR AFR_ENABLE_TESTS)
     add_executable(

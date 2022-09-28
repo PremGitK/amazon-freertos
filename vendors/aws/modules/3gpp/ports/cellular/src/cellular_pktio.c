@@ -1235,10 +1235,11 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
             pContext->pRespPrefix = pAtRspPrefix;
             pContext->PktioAtCmdType = atType;
             newCmdLen = cmdLen;
-            newCmdLen += 1U; /* Include space for \r. */
+            newCmdLen += 2U; /* Include space for \r. */
 
             ( void ) strncpy( pContext->pktioSendBuf, pAtCmd, cmdLen );
             pContext->pktioSendBuf[ cmdLen ] = '\r';
+            pContext->pktioSendBuf[ cmdLen + 1] = '\n';
 
             ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf,
                                                 ( const uint8_t * ) &pContext->pktioSendBuf, newCmdLen,

@@ -2780,7 +2780,6 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-    	IotLogError( "Cellular_SocketConnect AT Command, cmdBuf:%s", cmdBuf);
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
                                                                SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS );
 

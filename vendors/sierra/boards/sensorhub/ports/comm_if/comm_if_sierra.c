@@ -94,10 +94,10 @@ static void dv1_bus_enable(void)
 
 #else /* HARDWARE_DIVISION */
 
-#define BX310X_HL78_TXD         (GPIO_NUM_19)
-#define BX310X_HL78_RXD         (GPIO_NUM_22)
-#define BX310X_HL78_RTS         (GPIO_NUM_26)
-#define BX310X_HL78_CTS         (GPIO_NUM_27)
+#define BX310X_HL78_TXD         (GPIO_NUM_10)
+#define BX310X_HL78_RXD         (GPIO_NUM_9)
+#define BX310X_HL78_RTS         (0)
+#define BX310X_HL78_CTS         (0)
 
 #endif /* HARDWARE_DIVISION */
 
@@ -245,7 +245,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpen(CellularCommInterfaceReceiv
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .rx_flow_ctrl_thresh = 120,
         .use_ref_tick = 0x00,
     };
