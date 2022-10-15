@@ -30,7 +30,7 @@
  * @brief Access Point Name (APN) for your cellular network.
  * @todo set the corresponding APN according to your network provider.
  */
-#define configCELLULAR_APN                   ""
+#define configCELLULAR_APN                   "em"
 
 /*
  * @brief PDN context id for cellular network.
