@@ -166,4 +166,13 @@ CellularManagerError_t CellularManager_SetSignalStrengthChangedCallback( Cellula
 CellularManagerError_t CellularManager_GetCellularHandle( const CellularManagerContext_t * pCellularManagerContext,
                                                           CellularHandle_t * pCellularHandle );
 
+CellularManagerError_t CellularManager_TurnONGPS ( CellularManagerContext_t * pCellularManagerContext);
+CellularManagerError_t CellularManager_TurnOFFGPS ( CellularManagerContext_t * pCellularManagerContext);
+
+
+CellularManagerError_t CellularManager_GetPositionInfo ( CellularManagerContext_t * pCellularManagerContext,
+														CellularATCommandResponseReceivedCallback_t *prespCallBck,
+														void * pData,
+														unsigned short dataLen);
+
 #endif /* __CELLULAR_MANAGER_H__ */

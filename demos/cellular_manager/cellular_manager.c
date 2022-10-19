@@ -1087,3 +1087,76 @@ CellularManagerError_t CellularManager_GetCellularHandle( const CellularManagerC
 }
 
 /*-----------------------------------------------------------*/
+
+
+CellularManagerError_t CellularManager_TurnONGPS ( CellularManagerContext_t * pCellularManagerContext)
+{
+    CellularManagerError_t cellularMgrStatus = CELLULAR_MANAGER_SUCCESS;
+
+    if( cellularMgrStatus == CELLULAR_MANAGER_SUCCESS )
+    {
+        /* currently no signal URC avail. */
+        if( pCellularManagerContext != NULL )
+        {
+        	(void)Cellular_ATCommandRaw(pCellularManagerContext->cellularHandle,
+        							NULL,
+									"AT+QGPS=1",
+									CELLULAR_AT_NO_RESULT,
+									NULL,
+									NULL,
+									0);
+        }
+    }
+
+    return cellularMgrStatus;
+}
+
+
+CellularManagerError_t CellularManager_TurnOFFGPS ( CellularManagerContext_t * pCellularManagerContext)
+{
+    CellularManagerError_t cellularMgrStatus = CELLULAR_MANAGER_SUCCESS;
+
+    if( cellularMgrStatus == CELLULAR_MANAGER_SUCCESS )
+    {
+        /* currently no signal URC avail. */
+        if( pCellularManagerContext != NULL )
+        {
+        	(void)Cellular_ATCommandRaw(pCellularManagerContext->cellularHandle,
+        							NULL,
+									"AT+QGPSEND",
+									CELLULAR_AT_NO_RESULT,
+									NULL,
+									NULL,
+									0);
+        }
+    }
+
+    return cellularMgrStatus;
+}
+
+
+CellularManagerError_t CellularManager_GetPositionInfo ( CellularManagerContext_t * pCellularManagerContext,
+														CellularATCommandResponseReceivedCallback_t *prespCallBck,
+														void * pData,
+														unsigned short dataLen)
+{
+    CellularManagerError_t cellularMgrStatus = CELLULAR_MANAGER_SUCCESS;
+
+    if( cellularMgrStatus == CELLULAR_MANAGER_SUCCESS )
+    {
+        /* currently no signal URC avail. */
+        if( pCellularManagerContext != NULL )
+        {
+
+        	(void)Cellular_ATCommandRaw(pCellularManagerContext->cellularHandle,
+        							NULL,
+									"AT+QGPSLOC?",
+									CELLULAR_AT_WO_PREFIX,
+									prespCallBck,
+									pData,
+									dataLen);
+        }
+    }
+
+    return cellularMgrStatus;
+}
