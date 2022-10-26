@@ -683,6 +683,43 @@ static IotNetworkManager_t networkManager =
 
 #endif /* if CELLULAR_ENABLED */
 
+
+void vTurnONGps (void)
+{
+	(void)CellularManager_TurnONGPS(_pCellularManagerContext);
+}
+void vTurnOFFGps (void)
+{
+	(void)CellularManager_TurnOFFGPS(_pCellularManagerContext);
+}
+CellularPktStatus_t eGPSCallBck  ( CellularHandle_t cellularHandle,
+									const CellularATCommandResponse_t * pAtResp,
+									void * pData,
+									unsigned short dataLen )
+{
+	int i;
+	for(i = 0; i <= dataLen ; i++){
+		if((pAtResp->pItm->pLine[i] == '\n')||(pAtResp->pItm->pLine[i] == '\r')){
+			break;
+		}
+		else{
+			memcpy((void*)&pData[i],(void*)&(pAtResp->pItm->pLine[i]),1);
+		}
+	}
+	memcpy((void*)&pData[i],(void*)("\0"),1);
+	printf("PREM, GPS String :%s",(char*)pData);
+
+	return CELLULAR_PKT_STATUS_OK;
+}
+
+void vGetGPSLocationInfo (char *pi8respLoadBuff,unsigned short ui16lenOfBuff)
+{
+	CellularManager_GetPositionInfo ( _pCellularManagerContext,
+									  eGPSCallBck,
+									  pi8respLoadBuff,
+									  ui16lenOfBuff);
+}
+
 /*-----------------------------------------------------------*/
 
 static void _dispatchNetworkStateChangeCB( IotTaskPool_t taskPool,

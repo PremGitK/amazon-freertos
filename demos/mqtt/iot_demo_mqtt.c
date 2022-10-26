@@ -30,7 +30,7 @@
 
 /* The config header is always included first. */
 #include "iot_config.h"
-
+#include "gps_bg96.h"
 /* Standard includes. */
 #include <stdbool.h>
 #include <stdio.h>
@@ -652,8 +652,8 @@ static int _publishAllMessages( IotMqttConnection_t mqttConnection,
         /* Generate the payload for the PUBLISH. */
         status = snprintf( pPublishPayload,
                            PUBLISH_PAYLOAD_BUFFER_LENGTH,
-                           PUBLISH_PAYLOAD_FORMAT,
-                           ( int ) publishCount );
+                           "%s,Count:%d",
+						   pi8FetchGPSLocation() , ( int ) publishCount );
 
         /* Check for errors from snprintf. */
         if( status < 0 )
@@ -753,7 +753,14 @@ int RunMqttDemo( bool awsIotMqttMode,
     /* Counts the number of incoming PUBLISHES received (and allows the demo
      * application to wait on incoming PUBLISH messages). */
     IotSemaphore_t publishesReceived;
-
+    vTurnONGPSModule();
+    printf("PREM BEFORE DELAY\r\n");
+    vTaskDelay( pdMS_TO_TICKS( 60*1000 ) );
+    printf("PREM AFTER DELAY\r\n");
+    vRequestGPSForLocation();
+    vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
+    vTurnOFFGPSModule();
+    vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
     /* Topics used as both topic filters and topic names in this demo. */
     const char * pTopics[ TOPIC_FILTER_COUNT ] =
     {
