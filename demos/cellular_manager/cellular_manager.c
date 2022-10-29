@@ -1149,9 +1149,9 @@ CellularManagerError_t CellularManager_GetPositionInfo ( CellularManagerContext_
         {
 
         	(void)Cellular_ATCommandRaw(pCellularManagerContext->cellularHandle,
-        							NULL,
+        							"+QGPSLOC",
 									"AT+QGPSLOC?",
-									CELLULAR_AT_WO_PREFIX,
+									CELLULAR_AT_WITH_PREFIX,
 									prespCallBck,
 									pData,
 									dataLen);

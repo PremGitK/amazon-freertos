@@ -697,19 +697,48 @@ CellularPktStatus_t eGPSCallBck  ( CellularHandle_t cellularHandle,
 									void * pData,
 									unsigned short dataLen )
 {
-	int i;
-	for(i = 0; i <= dataLen ; i++){
-		if((pAtResp->pItm->pLine[i] == '\n')||(pAtResp->pItm->pLine[i] == '\r')){
-			break;
-		}
-		else{
-			memcpy((void*)&pData[i],(void*)&(pAtResp->pItm->pLine[i]),1);
-		}
-	}
-	memcpy((void*)&pData[i],(void*)("\0"),1);
-	printf("PREM, GPS String :%s",(char*)pData);
+	char i8tempDestBuff[255]={'\0'};
+	CellularPktStatus_t eretPktstatus =	CELLULAR_PKT_STATUS_OK;
+	char * pInputLine = NULL;
+    if( cellularHandle == NULL )
+    {
+    	eretPktstatus = CELLULAR_PKT_STATUS_FAILURE;
+    }
+    else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) ||
+             ( pAtResp->pItm->pLine == NULL ) || ( pData == NULL ) )
+    {
+        eretPktstatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else
+    {
+		int i32tempLenLoopvar;
+		char *pi8gpsRspHdr = "+QGPSLOC: ";
+		pInputLine = pAtResp->pItm->pLine;
+		printf("PREM, GPS Call back:%s \r\n",pInputLine);
 
-	return CELLULAR_PKT_STATUS_OK;
+
+		for(i32tempLenLoopvar = 0; i32tempLenLoopvar <= dataLen-1 ; i32tempLenLoopvar++)
+		{
+			if(pAtResp->pItm->pLine[i32tempLenLoopvar] == '\0')
+			{
+				break;
+			}
+			else
+			{
+				*(char*)&i8tempDestBuff[i32tempLenLoopvar] = (char)(pAtResp->pItm->pLine[i32tempLenLoopvar]);
+			}
+		}
+
+		//+QGPSLOC: 065707.000,1631.1285N,08046.7860E,3.5,25.7,2,0.00,0.0,0.0,291022,03
+		*(char*)&i8tempDestBuff[i32tempLenLoopvar] = '\0';
+		if (strstr((char*)i8tempDestBuff, pi8gpsRspHdr)){
+			strcpy((char*)pData,(const char*)i8tempDestBuff);
+		}
+
+		printf("PREM, GPS String :%s",(char*)pData);
+    }
+
+	return eretPktstatus;
 }
 
 void vGetGPSLocationInfo (char *pi8respLoadBuff,unsigned short ui16lenOfBuff)

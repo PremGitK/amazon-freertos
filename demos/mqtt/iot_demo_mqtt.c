@@ -143,7 +143,7 @@
 /**
  * @brief Size of the buffer that holds the PUBLISH messages in this demo.
  */
-#define PUBLISH_PAYLOAD_BUFFER_LENGTH            ( sizeof( PUBLISH_PAYLOAD_FORMAT ) + 2 )
+#define PUBLISH_PAYLOAD_BUFFER_LENGTH            (1024)//( sizeof( PUBLISH_PAYLOAD_FORMAT ) + 2 )
 
 /**
  * @brief The maximum number of times each PUBLISH in this demo will be retried.
@@ -652,7 +652,7 @@ static int _publishAllMessages( IotMqttConnection_t mqttConnection,
         /* Generate the payload for the PUBLISH. */
         status = snprintf( pPublishPayload,
                            PUBLISH_PAYLOAD_BUFFER_LENGTH,
-                           "%s,Count:%d",
+                           "{\"GPSData\":\"%s\",\"Count\":%d}",
 						   pi8FetchGPSLocation() , ( int ) publishCount );
 
         /* Check for errors from snprintf. */
