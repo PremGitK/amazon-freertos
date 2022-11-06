@@ -652,8 +652,8 @@ static int _publishAllMessages( IotMqttConnection_t mqttConnection,
         /* Generate the payload for the PUBLISH. */
         status = snprintf( pPublishPayload,
                            PUBLISH_PAYLOAD_BUFFER_LENGTH,
-                           "{\"GPSData\":\"%s\",\"Count\":%d}",
-						   pi8FetchGPSLocation() , ( int ) publishCount );
+                           "{\"Time\":%d,\"GPSData\":\"%s\",\"Count\":%d}",
+						   uiGetPosixTimeFrmRTC(),pi8FetchGPSLocation() , ( int ) publishCount );
 
         /* Check for errors from snprintf. */
         if( status < 0 )
