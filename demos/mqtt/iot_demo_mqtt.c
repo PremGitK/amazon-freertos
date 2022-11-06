@@ -43,7 +43,7 @@
 /* Platform layer includes. */
 #include "platform/iot_clock.h"
 #include "platform/iot_threads.h"
-
+#include "vitaliz_rtc.h"
 /* MQTT include. */
 #include "iot_mqtt.h"
 
@@ -738,6 +738,9 @@ static int _publishAllMessages( IotMqttConnection_t mqttConnection,
  *
  * @return `EXIT_SUCCESS` if the demo completes successfully; `EXIT_FAILURE` otherwise.
  */
+//#include "cellular_types.h"
+//extern void vGetCellularTime (CellularTime_t * pNetworkTime);
+
 int RunMqttDemo( bool awsIotMqttMode,
                  const char * pIdentifier,
                  void * pNetworkServerInfo,
@@ -753,10 +756,16 @@ int RunMqttDemo( bool awsIotMqttMode,
     /* Counts the number of incoming PUBLISHES received (and allows the demo
      * application to wait on incoming PUBLISH messages). */
     IotSemaphore_t publishesReceived;
+
+    vGetNwTimeAndSetRTC();
     vTurnONGPSModule();
+
+    printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
     printf("PREM BEFORE DELAY\r\n");
     vTaskDelay( pdMS_TO_TICKS( 60*1000 ) );
     printf("PREM AFTER DELAY\r\n");
+
+    printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
     vRequestGPSForLocation();
     vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
     vTurnOFFGPSModule();

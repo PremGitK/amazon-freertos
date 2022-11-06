@@ -542,7 +542,7 @@ static IotNetworkManager_t networkManager =
 
 #endif /* if WIFI_ENABLED */
 
-/*-----------------------------------------------------------*/
+
 
 #if CELLULAR_ENABLED
     /* Network Manager maintain the context. */
@@ -683,7 +683,6 @@ static IotNetworkManager_t networkManager =
 
 #endif /* if CELLULAR_ENABLED */
 
-
 void vTurnONGps (void)
 {
 	(void)CellularManager_TurnONGPS(_pCellularManagerContext);
@@ -739,6 +738,23 @@ CellularPktStatus_t eGPSCallBck  ( CellularHandle_t cellularHandle,
     }
 
 	return eretPktstatus;
+}
+
+
+unsigned int uiGetNetworkTime (uint8_t* pui8day,uint8_t* pui8month,unsigned short* pui16year,
+		uint8_t* pui8hour,uint8_t* pui8min,uint8_t* pui8sec)
+{
+	CellularError_t eretErr;
+	CellularTime_t scellularTime;
+	eretErr = Cellular_GetNetworkTime( CellularHandle,&scellularTime );
+	*pui8day = scellularTime.day;
+	*pui8month = scellularTime.month;
+	*pui16year = scellularTime.year;
+	*pui8hour = scellularTime.hour;
+	*pui8min = scellularTime.minute;
+	*pui8sec = scellularTime.second;
+	//Loading only UTC time
+	return (unsigned int)eretErr;
 }
 
 void vGetGPSLocationInfo (char *pi8respLoadBuff,unsigned short ui16lenOfBuff)
