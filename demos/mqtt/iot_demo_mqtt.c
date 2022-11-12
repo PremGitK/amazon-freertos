@@ -722,6 +722,96 @@ static int _publishAllMessages( IotMqttConnection_t mqttConnection,
     return status;
 }
 
+static int _publishMessageToTopics( IotMqttConnection_t mqttConnection,
+                                const char ** pTopicNames,
+								unsigned int ui32maxTopics,
+                                char *pi8messageString)
+{
+    int status = EXIT_SUCCESS;
+    static intptr_t publishCount = 0, i = 0;
+    IotMqttError_t publishStatus = IOT_MQTT_STATUS_PENDING;
+    IotMqttPublishInfo_t publishInfo = IOT_MQTT_PUBLISH_INFO_INITIALIZER;
+    IotMqttCallbackInfo_t publishComplete = IOT_MQTT_CALLBACK_INFO_INITIALIZER;
+    char pPublishPayload[ PUBLISH_PAYLOAD_BUFFER_LENGTH ] = { 0 };
+
+    /* The MQTT library should invoke this callback when a PUBLISH message
+     * is successfully transmitted. */
+    publishComplete.function = _operationCompleteCallback;
+
+    /* Set the common members of the publish info. */
+    publishInfo.qos = IOT_MQTT_QOS_1;
+    publishInfo.topicNameLength = TOPIC_FILTER_LENGTH;
+    publishInfo.pPayload = pPublishPayload;
+    publishInfo.retryMs = PUBLISH_RETRY_MS;
+    publishInfo.retryLimit = PUBLISH_RETRY_LIMIT;
+
+    publishCount++;
+    /* Loop to PUBLISH all messages of this demo. */
+    for( unsigned int ui32crntTopicTosnd = 0;
+    		ui32crntTopicTosnd < ui32maxTopics;
+    		ui32crntTopicTosnd++ )
+    {
+        /* Announce which burst of messages is being published. */
+        if( publishCount % IOT_DEMO_MQTT_PUBLISH_BURST_SIZE == 0 )
+        {
+            IotLogInfo( "Publishing messages %d to %d.",
+                        publishCount,
+                        publishCount + IOT_DEMO_MQTT_PUBLISH_BURST_SIZE - 1 );
+        }
+
+        /* Pass the PUBLISH number to the operation complete callback. */
+        publishComplete.pCallbackContext = ( void * ) publishCount;
+
+        /* Choose a topic name (round-robin through the array of topic names). */
+        publishInfo.pTopicName = pTopicNames[ ui32crntTopicTosnd ];
+
+        /* Generate the payload for the PUBLISH. */
+        status = snprintf( pPublishPayload,
+                           PUBLISH_PAYLOAD_BUFFER_LENGTH,
+                           "{\"Time\":%d,\"GPSData\":\"%s\",\"Count\":%d}",
+						   uiGetPosixTimeFrmRTC(),pi8FetchGPSLocation() , ( int ) publishCount );
+
+        /* Check for errors from snprintf. */
+        if( status < 0 )
+        {
+            IotLogError( "Failed to generate MQTT PUBLISH payload for PUBLISH %d.",
+                         ( int ) publishCount );
+            status = EXIT_FAILURE;
+
+            break;
+        }
+        else
+        {
+            publishInfo.payloadLength = ( size_t ) status;
+            status = EXIT_SUCCESS;
+        }
+
+        /* PUBLISH a message. This is an asynchronous function that notifies of
+         * completion through a callback. */
+        publishStatus = IotMqtt_TimedPublish( mqttConnection,
+                                         &publishInfo,
+                                         0,
+                                         10*1000);
+
+        if( publishStatus != IOT_MQTT_SUCCESS )
+        {
+            IotLogError( "MQTT PUBLISH %d returned error %s.",
+                         ( int ) publishCount,
+                         IotMqtt_strerror( publishStatus ) );
+            status = EXIT_FAILURE;
+            break;
+        }
+        else
+        {
+        	status = EXIT_SUCCESS;
+        }
+
+    }
+
+    return status;
+}
+
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -805,41 +895,50 @@ int RunMqttDemo( bool awsIotMqttMode,
         connectionEstablished = true;
 
         /* Add the topic filter subscriptions used in this demo. */
+        /*
+         * //Disabling Subscription for Prototyping : Prem , START
         status = _modifySubscriptions( mqttConnection,
                                        IOT_MQTT_SUBSCRIBE,
                                        pTopics,
                                        &publishesReceived );
+       	   //Disabling Subscription for Prototyping : Prem , END
+        */
     }
 
     if( status == EXIT_SUCCESS )
     {
         /* Create the semaphore to count incoming PUBLISH messages. */
-        if( IotSemaphore_Create( &publishesReceived,
+    	//Disabling Subscription for Prototyping : Prem , START
+        /*if( IotSemaphore_Create( &publishesReceived,
                                  0,
-                                 IOT_DEMO_MQTT_PUBLISH_BURST_SIZE ) == true )
+                                 IOT_DEMO_MQTT_PUBLISH_BURST_SIZE ) == true )*/
+        	//Disabling Subscription for Prototyping : Prem , END
         {
             /* PUBLISH (and wait) for all messages. */
-            status = _publishAllMessages( mqttConnection,
-                                          pTopics,
-                                          &publishesReceived );
+            status = _publishMessageToTopics( mqttConnection,
+                    pTopics,
+                    1,NULL);
 
             /* Destroy the incoming PUBLISH counter. */
-            IotSemaphore_Destroy( &publishesReceived );
+          //  IotSemaphore_Destroy( &publishesReceived );
         }
-        else
-        {
-            /* Failed to create incoming PUBLISH counter. */
-            status = EXIT_FAILURE;
-        }
+        // else
+        // {
+        //    /* Failed to create incoming PUBLISH counter. */
+        //   status = EXIT_FAILURE;
+        // }
     }
 
     if( status == EXIT_SUCCESS )
     {
         /* Remove the topic subscription filters used in this demo. */
-        status = _modifySubscriptions( mqttConnection,
+    	//Disabling Subscription for Prototyping : Prem , START
+        /*status = _modifySubscriptions( mqttConnection,
                                        IOT_MQTT_UNSUBSCRIBE,
                                        pTopics,
                                        NULL );
+                                       */
+        //Disabling Subscription for Prototyping : Prem , END
     }
 
     /* Disconnect the MQTT connection if it was established. */
