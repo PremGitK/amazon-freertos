@@ -830,7 +830,7 @@ static int _publishMessageToTopics( IotMqttConnection_t mqttConnection,
  */
 //#include "cellular_types.h"
 //extern void vGetCellularTime (CellularTime_t * pNetworkTime);
-
+extern void vReviveNetwork (void);
 int RunMqttDemo( bool awsIotMqttMode,
                  const char * pIdentifier,
                  void * pNetworkServerInfo,
@@ -839,7 +839,7 @@ int RunMqttDemo( bool awsIotMqttMode,
 {
     /* Return value of this function and the exit status of this program. */
     int status = EXIT_SUCCESS;
-
+    static int firstStatus;
     /* Handle of the MQTT connection used in this demo. */
     IotMqttConnection_t mqttConnection = IOT_MQTT_CONNECTION_INITIALIZER;
 
@@ -847,19 +847,7 @@ int RunMqttDemo( bool awsIotMqttMode,
      * application to wait on incoming PUBLISH messages). */
     IotSemaphore_t publishesReceived;
 
-    vGetNwTimeAndSetRTC();
-    vTurnONGPSModule();
 
-    printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
-    printf("PREM BEFORE DELAY\r\n");
-    vTaskDelay( pdMS_TO_TICKS( 60*1000 ) );
-    printf("PREM AFTER DELAY\r\n");
-
-    printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
-    vRequestGPSForLocation();
-    vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
-    vTurnOFFGPSModule();
-    vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
     /* Topics used as both topic filters and topic names in this demo. */
     const char * pTopics[ TOPIC_FILTER_COUNT ] =
     {
@@ -874,77 +862,101 @@ int RunMqttDemo( bool awsIotMqttMode,
 
     /* Initialize the libraries required for this demo. */
     status = _initializeDemo();
+    firstStatus = status;
 
-    if( status == EXIT_SUCCESS )
+    while(1)
     {
-        /* Mark the libraries as initialized. */
-        librariesInitialized = true;
+		vGetNwTimeAndSetRTC();
+		vTurnONGPSModule();
 
-        /* Establish a new MQTT connection. */
-        status = _establishMqttConnection( awsIotMqttMode,
-                                           pIdentifier,
-                                           pNetworkServerInfo,
-                                           pNetworkCredentialInfo,
-                                           pNetworkInterface,
-                                           &mqttConnection );
-    }
+		printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
+		printf("PREM BEFORE DELAY\r\n");
+		vTaskDelay( pdMS_TO_TICKS( 60*1000 ) );
+		printf("PREM AFTER DELAY\r\n");
 
-    if( status == EXIT_SUCCESS )
-    {
-        /* Mark the MQTT connection as established. */
-        connectionEstablished = true;
+		printf("PREM Time of Device:%d\r\n",uiGetPosixTimeFrmRTC());
+		vRequestGPSForLocation();
+		vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
+		vTurnOFFGPSModule();
+		vTaskDelay( pdMS_TO_TICKS( 2*1000 ) );
+		status = firstStatus;
+		if( status == EXIT_SUCCESS )
+		{
+			/* Mark the libraries as initialized. */
+			librariesInitialized = true;
 
-        /* Add the topic filter subscriptions used in this demo. */
-        /*
-         * //Disabling Subscription for Prototyping : Prem , START
-        status = _modifySubscriptions( mqttConnection,
-                                       IOT_MQTT_SUBSCRIBE,
-                                       pTopics,
-                                       &publishesReceived );
-       	   //Disabling Subscription for Prototyping : Prem , END
-        */
-    }
+			/* Establish a new MQTT connection. */
+			status = _establishMqttConnection( awsIotMqttMode,
+											   pIdentifier,
+											   pNetworkServerInfo,
+											   pNetworkCredentialInfo,
+											   pNetworkInterface,
+											   &mqttConnection );
+		}
 
-    if( status == EXIT_SUCCESS )
-    {
-        /* Create the semaphore to count incoming PUBLISH messages. */
-    	//Disabling Subscription for Prototyping : Prem , START
-        /*if( IotSemaphore_Create( &publishesReceived,
-                                 0,
-                                 IOT_DEMO_MQTT_PUBLISH_BURST_SIZE ) == true )*/
-        	//Disabling Subscription for Prototyping : Prem , END
-        {
-            /* PUBLISH (and wait) for all messages. */
-            status = _publishMessageToTopics( mqttConnection,
-                    pTopics,
-                    1,NULL);
+		if( status == EXIT_SUCCESS )
+		{
+			/* Mark the MQTT connection as established. */
+			connectionEstablished = true;
 
-            /* Destroy the incoming PUBLISH counter. */
-          //  IotSemaphore_Destroy( &publishesReceived );
-        }
-        // else
-        // {
-        //    /* Failed to create incoming PUBLISH counter. */
-        //   status = EXIT_FAILURE;
-        // }
-    }
+			/* Add the topic filter subscriptions used in this demo. */
+			/*
+			 * //Disabling Subscription for Prototyping : Prem , START
+			status = _modifySubscriptions( mqttConnection,
+										   IOT_MQTT_SUBSCRIBE,
+										   pTopics,
+										   &publishesReceived );
+			   //Disabling Subscription for Prototyping : Prem , END
+			*/
+		}
 
-    if( status == EXIT_SUCCESS )
-    {
-        /* Remove the topic subscription filters used in this demo. */
-    	//Disabling Subscription for Prototyping : Prem , START
-        /*status = _modifySubscriptions( mqttConnection,
-                                       IOT_MQTT_UNSUBSCRIBE,
-                                       pTopics,
-                                       NULL );
-                                       */
-        //Disabling Subscription for Prototyping : Prem , END
-    }
+		if( status == EXIT_SUCCESS )
+		{
+			/* Create the semaphore to count incoming PUBLISH messages. */
+			//Disabling Subscription for Prototyping : Prem , START
+			/*if( IotSemaphore_Create( &publishesReceived,
+									 0,
+									 IOT_DEMO_MQTT_PUBLISH_BURST_SIZE ) == true )*/
+				//Disabling Subscription for Prototyping : Prem , END
+			{
+				/* PUBLISH (and wait) for all messages. */
+				status = _publishMessageToTopics( mqttConnection,
+						pTopics,
+						1,NULL);
 
-    /* Disconnect the MQTT connection if it was established. */
-    if( connectionEstablished == true )
-    {
-        IotMqtt_Disconnect( mqttConnection, 0 );
+				/* Destroy the incoming PUBLISH counter. */
+			  //  IotSemaphore_Destroy( &publishesReceived );
+			}
+			// else
+			// {
+			//    /* Failed to create incoming PUBLISH counter. */
+			//   status = EXIT_FAILURE;
+			// }
+		}
+
+		if( status == EXIT_SUCCESS )
+		{
+			/* Remove the topic subscription filters used in this demo. */
+			//Disabling Subscription for Prototyping : Prem , START
+			/*status = _modifySubscriptions( mqttConnection,
+										   IOT_MQTT_UNSUBSCRIBE,
+										   pTopics,
+										   NULL );
+										   */
+			//Disabling Subscription for Prototyping : Prem , END
+		}
+
+		/* Disconnect the MQTT connection if it was established. */
+		if( connectionEstablished == true )
+		{
+			IotMqtt_Disconnect( mqttConnection, 0 );
+		}
+
+		vTaskDelay( pdMS_TO_TICKS( 60*1000 ) );
+
+		vReviveNetwork();
+
+
     }
 
     /* Clean up libraries if they were initialized. */

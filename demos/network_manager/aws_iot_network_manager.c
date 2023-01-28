@@ -542,7 +542,7 @@ static IotNetworkManager_t networkManager =
 
 #endif /* if WIFI_ENABLED */
 
-
+static volatile uint32_t bReviveCellular = 0;
 
 #if CELLULAR_ENABLED
     /* Network Manager maintain the context. */
@@ -551,7 +551,25 @@ static IotNetworkManager_t networkManager =
     static void _cellularConnectionStateCB( void * pUserData,
                                             CellularManagerConnectionState_t connectionState )
     {
-        IotLogDebug( "Cellular Manager connectionState Callback called %d\r\n", connectionState );
+        IotLogInfo( "Cellular Manager connectionState Callback called %d\r\n", connectionState );
+        switch (connectionState)
+        {
+			case CELLULAR_CONNECTION_OFF:
+			case CELLULAR_CONNECTION_REBOOTED:
+			case CELLULAR_CONNECTION_RF_OFF:
+			case CELLULAR_CONNECTION_DISCONNECTED:
+			case CELLULAR_CONNECTION_DISCONNECTED_NO_SIM:
+			case CELLULAR_CONNECTION_UNKNOWN:
+			{
+				bReviveCellular = 1;
+				break;
+			}
+			default:
+			{
+				//Do nothing
+				break;
+			}
+        }
     }
 
     static bool _cellularEnable( void )
@@ -580,10 +598,12 @@ static IotNetworkManager_t networkManager =
         /* Init cellular manager. */
         if( cellularStatus == true )
         {
+        	printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
             wmStatus = CellularManager_Init( &_pCellularManagerContext, pCommIntf );
-
+            printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
             if( wmStatus != CELLULAR_MANAGER_SUCCESS )
             {
+            	printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
                 IotLogError( "Cellular manger init failed %d", wmStatus );
                 cellularStatus = false;
             }
@@ -659,25 +679,29 @@ static IotNetworkManager_t networkManager =
             }
             */
         }
-
+        printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
         /* Clean up the cellular network. */
         if( cellularStatus == false )
         {
+            printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
             IotLogError( "Cellular network enable failed" );
 
             if( pCommIntf != NULL )
             {
+            	printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
                 if( wmStatus != CELLULAR_MANAGER_SUCCESS )
                 {
+                	printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
                     /* Disconnect the PDN network. */
-                    ( void ) CellularManager_Disconnect( _pCellularManagerContext, configCELLULAR_PDN_CONTEXT_ID );
-
+                    //( void ) CellularManager_Disconnect( _pCellularManagerContext, configCELLULAR_PDN_CONTEXT_ID );
+                    printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
                     /* Cleanup the cellular manager. */
                     ( void ) CellularManager_Cleanup( _pCellularManagerContext );
                 }
             }
         }
-
+        bReviveCellular = 0;
+        printf("\r\n************* PREM : Debug point :%d*************\r\n",__LINE__ );
         return cellularStatus;
     }
 
@@ -691,6 +715,18 @@ void vTurnOFFGps (void)
 {
 	(void)CellularManager_TurnOFFGPS(_pCellularManagerContext);
 }
+
+void vReviveNetwork (void)
+{
+	IotLogInfo( "Reviving cellular network\r\n" );
+	if(bReviveCellular == 1){
+	IotLogInfo( "Reviving cellular network : 1\r\n" );
+	( void ) CellularManager_Cleanup( _pCellularManagerContext );
+	_cellularEnable();
+	bReviveCellular = 0;
+	}
+}
+
 CellularPktStatus_t eGPSCallBck  ( CellularHandle_t cellularHandle,
 									const CellularATCommandResponse_t * pAtResp,
 									void * pData,
