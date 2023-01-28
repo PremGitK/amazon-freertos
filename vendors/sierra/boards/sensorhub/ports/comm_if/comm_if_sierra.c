@@ -39,7 +39,7 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 
-#define COMM_IF_DEBUG 0
+#define COMM_IF_DEBUG 1
 
 #if COMM_IF_DEBUG
 
@@ -94,8 +94,8 @@ static void dv1_bus_enable(void)
 
 #else /* HARDWARE_DIVISION */
 
-#define BX310X_HL78_TXD         (GPIO_NUM_10)
-#define BX310X_HL78_RXD         (GPIO_NUM_9)
+#define BX310X_HL78_TXD         (GPIO_NUM_18)
+#define BX310X_HL78_RXD         (GPIO_NUM_19)
 #define BX310X_HL78_RTS         (0)
 #define BX310X_HL78_CTS         (0)
 
