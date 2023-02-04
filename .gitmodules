@@ -34,3 +34,6 @@
 	path = vendors/sierra/esp-idf
 	url = https://github.com/espressif/esp-afr-sdk.git
 	branch = release/v3.3
+[submodule "vendors/sierra/boards/sensorhub/components/CloudJSONHandler/coreJSON"]
+	path = vendors/sierra/boards/sensorhub/components/CloudJSONHandler/coreJSON
+	url = https://github.com/FreeRTOS/coreJSON.git
